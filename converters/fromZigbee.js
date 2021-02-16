@@ -2739,11 +2739,14 @@ const converters = {
             case tuya.dataPoints.moesMinTemp:
                 return {min_temperature: value};
             case tuya.dataPoints.moesLocalTemp:
-                return {local_temperature: parseFloat((value / 10).toFixed(1))};
+                temperature = value;
+                // Unsigned 16bit negative number conversion
+                if (temperature & 1<<15) temperature = temperature - (1<<16)
+                return {local_temperature: parseFloat((temperature / 10).toFixed(1))};
             case tuya.dataPoints.moesTempCalibration:
                 temperature = value;
-                // for negative values produce complimentary hex (equivalent to negative values)
-                if (temperature > 4000) temperature = temperature - 4096;
+                // Unisgned 12bit negative number conversion
+                if (temperature & 1<<11) temperature = temperature - (1<<12);
                 return {local_temperature_calibration: temperature};
             case tuya.dataPoints.moesHold: // state is inverted, preset_mode is deprecated
                 return {preset_mode: value ? 'program' : 'hold', preset: value ? 'program' : 'hold'};
